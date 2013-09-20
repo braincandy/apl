@@ -1,0 +1,11 @@
+<?php
+
+namespace Apl\Core;
+
+interface AplCodeStyler {
+  
+  function processLine($line, $vars);
+  function implodeCode($loc);
+  function handleEvent(\Apl\Core\AplCodeContainer $code, $type, $delegateKey);
+  
+}

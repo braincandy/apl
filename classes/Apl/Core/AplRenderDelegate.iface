@@ -1,0 +1,14 @@
+<?php
+
+namespace Apl\Core;
+
+interface AplRenderDelegate {
+  
+  function checkDelegation($delegateKey);
+  
+  function setCodeContainer(\Apl\Core\AplCodeContainer $code);
+  function setRenderer(\Apl\Core\AplRenderer $renderer);
+  
+  function render($delegateKey, $vars);
+  
+}

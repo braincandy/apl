@@ -1,0 +1,97 @@
+<?php
+
+namespace Apl\Structure;
+
+abstract class AplGenericStructure implements \Apl\Core\AplRenderable {
+  
+  private $variables = array();
+  private $delegateID = '';
+  private $components = array();
+  
+  public function __construct($delegateID) {
+    $this->delegateID = $delegateID;
+  }
+  
+  public function buildRender() {
+    $render = array();
+    foreach ($this->variables as $key => $value) {
+      if (!empty($value)) {
+        if ($value instanceof \Apl\Core\AplRenderable) {
+          $render[$key] = $value->buildRender();
+        } 
+        else {
+          $render['#' . $key] = $value;
+        }
+      }
+    }
+    foreach ($this->components as $key => $list) {
+      if (!empty($list)) {
+        $render[$key] = array(
+          '#type' => 'component:container',
+        );
+        foreach ($list as $key2 => $component) {
+          $render[$key][$key2] = $component->buildRender();
+        }
+      }
+    }
+    $render['#type'] = $this->delegateID;
+    return $render;
+  }
+  
+  public function addComponent($category, \Apl\Core\AplRenderable $component) {
+    if (!isset($this->components[$category])) {
+      $this->components[$category] = array();
+    }
+    $this->components[$category][$this->hashComponent($component)] = $component;
+  }
+  
+  public function removeComponent($category, \Apl\Core\AplRenderable $component) {
+    $hash = $this->hashComponent($component);
+    if (isset($this->components[$category][$hash])) {
+      unset($this->components[$category][$hash]);
+    }
+  }
+  
+  private function hashComponent(\Apl\Core\AplRenderable $component) {
+    return hash('sha256', serialize($component->uuid()));
+  }
+  
+  public function setVariable($key, $value) {
+    $this->variables[$key] = $value;
+    return $this;
+  }
+  
+  public function addVariable($key, $value, $subkey = NULL) {
+    if (!isset($this->variables[$key])) {
+      $this->variables[$key] = array();
+    }
+    if (empty($subkey)) {
+      $this->variables[$key][] = $value;
+    }
+    else {
+      $this->variables[$key][$subkey] = $value;
+    }
+  }
+  
+  public function removeVariable($key, $subkey) {
+    if (isset($this->variables[$key])) {
+      if (isset($this->variables[$key][$subkey])) {
+        unset($this->variables[$key][$subkey]);
+      }
+    }
+  }
+  
+  public function unsetVariable($key) {
+    if (isset($this->variables[$key])) {
+      unset($this->variables[$key]);
+    }
+  }
+  
+  public function getVariable($key) {
+    if (isset($this->variables[$key])) {
+      return $this->variables[$key];
+    }
+    return NULL;
+  }
+  
+}

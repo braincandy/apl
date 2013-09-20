@@ -1,0 +1,22 @@
+<?php
+
+namespace Apl\Renders\PHP;
+
+class AplPHPCodeStyler implements \Apl\Core\AplCodeStyler {
+  
+  public function processLine($line, $vars) {
+    for ($k = 0; $k < $vars['indent']; $k++) {
+      $line = '  ' . $line;
+    }
+    return $line;
+  }
+  
+  public function implodeCode($loc) {
+    return implode("\r\n", $loc);
+  }
+  
+  public function handleEvent(\Apl\Core\AplCodeContainer $code, $type, $delegateKey) {
+    
+  }
+  
+}

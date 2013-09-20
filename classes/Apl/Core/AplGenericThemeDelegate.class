@@ -1,0 +1,23 @@
+<?php
+
+namespace Apl\Core;
+
+abstract class AplGenericThemeDelegate implements \Apl\Core\AplThemeDelegate {
+  
+  private $renderer;
+  
+  public function setRenderer(\Apl\Core\AplRenderer $renderer) {
+    $this->renderer = $renderer;
+  }
+  
+  public function renderChildren($object, $childKey) {
+    if (!empty($object[$childKey])) {
+      foreach ($object[$childKey] as $key => $obj) {
+        if (substr($key, 0, 1) != '#') {
+          $this->renderer->render($obj, FALSE);
+        }
+      }
+    }
+  } 
+  
+}

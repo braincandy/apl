@@ -1,0 +1,44 @@
+<?php
+
+namespace Apl\Structure;
+
+class AplInterface extends \Apl\Structure\AplGenericStructure {
+  
+  public function __construct($classname, $parent = NULL) {
+    parent::__construct(APL_DELEGATE_INTERFACE);
+    $this->setClass($classname);
+    if (!empty($parent)) {
+      $this->setParent($parent);
+    }
+  }
+  
+  public function uuid() {
+    return $this->getVariable('classname');
+  }
+  
+  public function setNamespace($namespace) {
+    $this->setVariable('namespacing', $namespace);
+  }
+  
+  public function addMethod(\Apl\Structure\AplMethod $method) {
+    $this->addComponent('methods', $method);
+  }
+  
+  public function setParent(\Apl\Structure\AplInterface $class) {
+    if (!empty($class)) {
+      $this->setVariable('parent', $class);
+    }
+    else {
+      $this->unsetVariable('parent');
+    }
+    return $this;
+  }
+  
+  public function setClass($class) {
+    if (!empty($class)) {
+      $this->setVariable('classname', $class);
+    }
+    return $this;
+  }
+  
+}

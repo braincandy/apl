@@ -1,0 +1,44 @@
+<?php
+
+namespace Apl\Renders\PHP;
+
+class AplPHPBasicThemeDelegate extends \Apl\Core\AplGenericThemeDelegate {
+  
+  public function checkDelegation($themeKey) {
+    $pieces = explode(APL_DELEGATE_SEPARATOR, $themeKey);
+    return $pieces[0] == APL_DELEGATE_THEME_BASIC;
+  }
+  
+  public function theme($themeKey, $vars) {
+    switch ($themeKey) {
+      case APL_DELEGATE_THEME_CLASS_REF:
+        return $this->themeClassReference($vars);
+        break;
+      case APL_DELEGATE_THEME_NAMESPACE:
+        return $this->themeNamespace($vars);
+        break;
+    }
+  }
+  
+  private function themeNamespace($vars) {
+    $namespace = '';
+    if (!empty($vars['#namespacing'])) {
+      if (empty($vars['#is_definition'])) {
+        $namespace .= '\\';
+      }
+      $namespace .= str_replace('.', '\\', $vars['#namespacing']);
+      if (empty($vars['#is_definition'])) {
+        $namespace .= '\\';
+      }
+    }
+    return $namespace;
+  }
+  
+  private function themeClassReference($vars) {
+    $classref = '';
+    $classref .= $this->theme(APL_DELEGATE_THEME_NAMESPACE, $vars);
+    $classref .= $vars['#classname'];
+    return $classref;
+  }
+  
+}

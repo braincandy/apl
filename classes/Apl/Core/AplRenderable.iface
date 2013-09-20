@@ -1,0 +1,11 @@
+<?php
+
+namespace Apl\Core;
+
+interface AplRenderable {
+  
+  function buildRender();
+  
+  function uuid();
+  
+}

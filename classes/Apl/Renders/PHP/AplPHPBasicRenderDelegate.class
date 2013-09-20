@@ -1,0 +1,91 @@
+<?php
+
+namespace Apl\Renders\PHP;
+
+class AplPHPBasicRenderDelegate extends \Apl\Core\AplGenericRenderDelegate {
+  
+  public function checkDelegation($delegateKey) {
+    $key = explode(APL_DELEGATE_SEPARATOR, $delegateKey);
+    if ($key[0] == APL_DELEGATE_BASIC) {
+      return TRUE;
+    }
+    return FALSE;
+  }
+  
+  public function render($delegateKey, $vars) {
+    switch ($delegateKey) {
+      case APL_DELEGATE_CLASS:
+        $this->renderClass($vars);
+        break;
+      case APL_DELEGATE_INTERFACE:
+        $this->renderInterface($vars);
+        break;
+    }
+  }
+  
+  private function renderInterface($vars) {
+    if (!empty($vars['#namespacing'])) {
+      $this->coder()->addLine('namespace ' . 
+          $this->theme(APL_DELEGATE_THEME_NAMESPACE, $vars + array(
+            '#is_definition' => TRUE,
+          )) . ';');
+      $this->coder()->addLine("");
+    }
+    $def = array();
+    if (!empty($vars['is_abstract'])) {
+      $def[] = 'abstract';
+    }
+    $def[] = 'interface ' . $vars['#classname'];
+    if (!empty($vars['parent'])) {
+      $def[] = 'extends ' . $this->theme(APL_DELEGATE_THEME_CLASS_REF, $vars['parent']);
+    }
+    $this->coder()->addLine(implode(" ", $def) . " {");
+    $this->coder()->indent();
+    $this->coder()->addLine("");
+    $this->coder()->outdent();
+    $this->coder()->addLine("}");
+  }
+  
+  private function renderClass($vars) {
+    if (!empty($vars['#namespacing'])) {
+      $this->coder()->addLine('namespace ' . 
+          $this->theme(APL_DELEGATE_THEME_NAMESPACE, $vars + array(
+            '#is_definition' => TRUE,
+          )) . ';');
+      $this->coder()->addLine("");
+    }
+    $def = array();
+    if (!empty($vars['#is_abstract'])) {
+      $def[] = 'abstract';
+    }
+    $def[] = 'class ' . $vars['#classname'];
+    if (!empty($vars['parent'])) {
+      $def[] = 'extends ' . $this->theme(APL_DELEGATE_THEME_CLASS_REF, $vars['parent']);
+    }
+    if (!empty($vars['interfaces'])) {
+      $iface_def = 'implements ';
+      $first = TRUE;
+      foreach ($vars['interfaces'] as $key => $iface) {
+        if (!(substr($key, 0, 1) == '#')) {
+          if ($first) {
+            $first = FALSE;
+          }
+          else {
+            $iface_def .= ', ';
+          }
+          $iface_def .= $this->theme(APL_DELEGATE_THEME_CLASS_REF, $iface);
+        }
+      }
+      if ($iface_def != 'implements ') {
+        $def[] = $iface_def;
+      }
+    }
+    var_dump($vars);
+    $this->coder()->addLine(implode(" ", $def) . " {");
+    $this->coder()->indent();
+    $this->coder()->addLine("");
+    $this->coder()->outdent();
+    $this->coder()->addLine("}");
+  }
+  
+}

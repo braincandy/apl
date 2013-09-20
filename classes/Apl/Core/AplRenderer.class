@@ -1,0 +1,84 @@
+<?php
+
+namespace Apl\Core;
+
+class AplRenderer {
+  
+  private $delegates = array();
+  private $cached = array();
+  private $code = NULL;
+  
+  public function __construct(\Apl\Core\AplCodeStyler $styler) {
+    $this->code = new \Apl\Core\AplCodeContainer($styler);
+    $this->delegates = array(
+      'themers' => array(),
+      'renderers' => array(),
+    );
+    $this->cache = array(
+      'themers' => array(),
+      'renderers' => array(),
+    );
+  }
+  
+  public function addDelegate(\Apl\Core\AplRenderDelegate $delegate) {
+    $this->delegates['renderers'][] = $delegate;
+    $delegate->setCodeContainer($this->code);
+    $delegate->setRenderer($this);
+    $this->cached['renderers'] = array();
+  }
+  
+  public function addThemer(\Apl\Core\AplThemeDelegate $delegate) {
+    $this->delegates['themers'][] = $delegate;
+    $delegate->setRenderer($this);
+    $this->cached['themers'] = array();
+  }
+  
+  private function findDelegate($type, $delegateKey) {
+    if (empty($this->cached[$type][$delegateKey])) {
+      foreach ($this->delegates[$type] as $delegate) {
+        if ($delegate->checkDelegation($delegateKey)) {
+          $this->cached[$type][$delegateKey] = $delegate;
+          return $this->cached[$type][$delegateKey];
+        }
+      }
+      return NULL;
+    }
+    else {
+      return $this->cached[$type][$delegateKey];
+    }
+  }
+  
+  public function theme($key, $vars) {
+    $delegate = $this->findDelegate('themers', $key);
+    if (!empty($delegate)) {
+      return $delegate->theme($key, $vars);
+    }
+    else {
+    }
+  }
+  
+  public function render($object, $reset = TRUE) {
+    if ($reset) {
+      $this->code->reset();
+    }
+    $this->renderCode($object['#type'], $object);
+  }
+  
+  public function getCode() {
+    return $this->code->finish();
+  }
+  
+  private function renderCode($delegateKey, $vars) {
+    $delegate = $this->findDelegate('renderers', $delegateKey);
+    if (!empty($delegate)) {
+      $this->code->prerender($delegateKey);
+      $delegate->render($delegateKey, $vars);
+      $this->code->postrender($delegateKey);
+      return TRUE;
+    }
+    else {
+      return FALSE;
+    }
+  }
+  
+}

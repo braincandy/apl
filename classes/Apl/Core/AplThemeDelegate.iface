@@ -1,0 +1,11 @@
+<?php
+
+namespace Apl\Core;
+
+interface AplThemeDelegate {
+  
+  function checkDelegation($delegateKey);
+  function setRenderer(\Apl\Core\AplRenderer $renderer);
+  function theme($delegateKey, $vars);
+  
+}

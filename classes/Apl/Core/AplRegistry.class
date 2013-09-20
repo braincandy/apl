@@ -1,0 +1,53 @@
+<?php
+
+namespace Apl\Core;
+
+abstract class AplRegistry {
+  
+  private static $stylers = array();
+  private static $themers = array();
+  private static $renderers = array();
+  
+  public static function registerStyler($language, $classname) {
+    self::$stylers[$language] = $classname;
+  }
+  
+  public static function registerThemer($language, $classname) {
+    self::$themers[$language][$classname] = $classname;
+  }
+  
+  public static function registerRenderer($language, $classname) {
+    self::$renderers[$language][$classname] = $classname;
+  }
+  
+  public static function renderFactory($language) {
+    $renderer = new \Apl\Core\AplRenderer(new self::$stylers[$language]());
+    foreach (self::$themers[$language] as $class) {
+      $renderer->addThemer(new $class());
+    }
+    foreach (self::$renderers[$language] as $class) {
+      $renderer->addDelegate(new $class());
+    }
+    return $renderer;
+  }
+  
+  public static function renderInLanguage(\Apl\Core\AplRenderable $object, $language) {
+    $renderer = self::renderFactory($language);
+    $renderer->render($object->buildRender());
+    return $renderer->getCode();
+  }
+  
+  public static function bulkRegister($bulkRegistry) {
+    foreach ($bulkRegistry as $language => $list) {
+      $namespace = $list['#base_path'] . '\\';
+      self::registerStyler($language, $namespace . $list['styles']);
+      foreach ($list['themers'] as $themeclass) {
+        self::registerThemer($language, $namespace . $themeclass);
+      }
+      foreach ($list['renderers'] as $renderclass) {
+        self::registerRenderer($language, $namespace . $renderclass);
+      }
+    }
+  }
+  
+}

@@ -1,0 +1,60 @@
+<?php
+
+namespace Apl\Structure;
+
+class AplClass extends \Apl\Structure\AplGenericStructure {
+  
+  public function __construct($classname, $parent = NULL) {
+    parent::__construct(APL_DELEGATE_CLASS);
+    $this->setClass($classname);
+    if (!empty($parent)) {
+      $this->setParent($parent);
+    }
+    $this->setAbstract(FALSE);
+  }
+  
+  public function uuid() {
+    return $this->getVariable('classname');
+  }
+  
+  public function setNamespace($namespace) {
+    $this->setVariable('namespacing', $namespace);
+  }
+  
+  public function addMethod(\Apl\Structure\AplMethod $method) {
+    $this->addComponent('methods', $method);
+  }
+  
+  public function setParent(\Apl\Structure\AplClass $class) {
+    if (!empty($class)) {
+      $this->setVariable('parent', $class);
+    }
+    else {
+      $this->unsetVariable('parent');
+    }
+    return $this;
+  }
+  
+  public function setAbstract($abstract = FALSE) {
+    $this->setVariable('is_abstract', !!$abstract);
+  }
+  
+  public function setClass($class) {
+    if (!empty($class)) {
+      $this->setVariable('classname', $class);
+    }
+    return $this;
+  }
+  
+  public function addInterface(\Apl\Structure\AplInterface $iface) {
+    $this->addComponent('interfaces', $iface);
+    return $this;
+  }
+  
+  public function removeInterface(\Apl\Structure\AplInterface $iface) {
+    $this->removeComponent('interfaces', $iface);
+    return $this;
+  }
+   
+  
+}

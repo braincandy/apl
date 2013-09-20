@@ -1,0 +1,48 @@
+<?php
+
+namespace Apl\Core;
+
+class AplCodeContainer {
+  
+  private $code = array();
+  private $styler = NULL;
+  private $indentLevel = 0;
+  
+  public function __construct(\Apl\Core\AplCodeStyler $styler) {
+    $this->styler = $styler;
+  }
+  
+  public function prerender($delegateKey) {
+    $this->styler->handleEvent($this, 'before', $delegateKey);
+  }
+  
+  public function postrender($delegateKey) {
+    $this->styler->handleEvent($this, 'after', $delegateKey);
+  }
+  
+  public function addLine($code) {
+    $this->code[] = $this->styler->processLine($code, array(
+      'indent' => $this->indentLevel,
+    ));
+  }
+  
+  public function reset() {
+    $this->code = array();
+    $this->indentLevel = 0;
+  }
+  
+  public function indent() {
+    $this->indentLevel++;
+  }
+  
+  public function outdent() {
+    if ($this->indentLevel > 0) {
+      $this->indentLevel--;
+    }
+  }
+  
+  public function finish() {
+    return $this->styler->implodeCode($this->code);
+  }
+  
+}

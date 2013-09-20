@@ -1,0 +1,35 @@
+<?php
+
+namespace Apl\Core;
+
+abstract class AplGenericRenderDelegate implements \Apl\Core\AplRenderDelegate {
+  
+  private $code;
+  private $renderer;
+  
+  public function setCodeContainer(\Apl\Core\AplCodeContainer $code) {
+    $this->code = $code;
+  }
+  
+  public function setRenderer(\Apl\Core\AplRenderer $renderer) {
+    $this->renderer = $renderer;
+  }
+  
+  public function coder() {
+    return $this->code;
+  }
+  
+  public function renderChildren($object, $childKey) {
+    if (!empty($object[$childKey])) {
+      foreach ($object[$childKey] as $key => $obj) {
+        if (substr($key, 0, 1) != '#') {
+          $this->renderer->render($obj, FALSE);
+        }
+      }
+    }
+  } 
+  
+  public function theme($themeKey, $themeVars) {
+    return $this->renderer->theme($themeKey, $themeVars);
+  }
+}
